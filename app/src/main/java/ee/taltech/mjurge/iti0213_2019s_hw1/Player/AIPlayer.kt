@@ -11,7 +11,7 @@ import java.io.Serializable
 class AIPlayer<T: InterfaceGameSquare, U: InterfacePosition>(private var playerString: String):
     InterfacePlayer<T, U>, Serializable {
     override suspend fun getMove(board: InterfaceBoard<T, U>): InterfaceMove<U> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onUserClickedLocation(location: U) {
