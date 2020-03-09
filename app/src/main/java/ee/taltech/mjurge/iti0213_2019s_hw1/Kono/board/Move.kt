@@ -1,4 +1,4 @@
-package ee.taltech.mjurge.iti0213_2019s_hw1.board
+package ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board
 
 class Move<T: InterfacePosition>(private val from: T, private val to: T):
     InterfaceMove<T> {

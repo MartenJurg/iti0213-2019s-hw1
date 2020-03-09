@@ -1,26 +1,24 @@
-package ee.taltech.mjurge.iti0213_2019s_hw1
+package ee.taltech.mjurge.iti0213_2019s_hw1.Kono
 
 import android.util.Log
 import android.widget.TextView
-import ee.taltech.mjurge.iti0213_2019s_hw1.Player.AIPlayer
-import ee.taltech.mjurge.iti0213_2019s_hw1.Player.HumanPlayer
-import ee.taltech.mjurge.iti0213_2019s_hw1.Player.InterfacePlayer
-import ee.taltech.mjurge.iti0213_2019s_hw1.board.*
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Constants.C
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Player.AIPlayer
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Player.HumanPlayer
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Player.InterfacePlayer
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.Serializable
 
 class GameSession(private val boardViews: ArrayList<ArrayList<TextView>>,
                   private var gameMode: String,
                   private var player1Turn: Boolean): Serializable {
-    val board: GameBoard<Position> = GameBoard(createBoardList(), player1Turn)
 
     private var player1: InterfacePlayer<InterfaceGameSquare,InterfacePosition>
     private var player2: InterfacePlayer<InterfaceGameSquare,InterfacePosition>
-
-    @Transient
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    var isGamePlaying = false
+    val board: GameBoard<Position> = GameBoard(createBoardList(), player1Turn)
 
     init {
         when (gameMode) {
@@ -42,26 +40,31 @@ class GameSession(private val boardViews: ArrayList<ArrayList<TextView>>,
     suspend fun play(player1Turn: Boolean) {
         board.setPlayer1Turn(player1Turn)
         board.resetBoard()
-        MainActivity.isGamePlaying = true
+        isGamePlaying = true
+        playGameLoop()
+    }
 
-        while (MainActivity.isGamePlaying) {
-            val move = if (board.getPlayer1Turn()) player1.getMove(board as InterfaceBoard<InterfaceGameSquare, InterfacePosition>)
+    suspend fun keepPlaying() {
+        playGameLoop()
+    }
+
+    suspend private fun playGameLoop() {
+        while (isGamePlaying) {
+            if (board.isGameOver()) break
+            val move = if (board.getPlayer1Turn())
+                player1.getMove(board as InterfaceBoard<InterfaceGameSquare, InterfacePosition>)
             else player2.getMove(board as InterfaceBoard<InterfaceGameSquare, InterfacePosition>)
-            Log.d("---", "ooooooi")
 
-
-
-            board.makeMove(move as InterfaceMove<Position>)
-
-            if (board.getWinner() == C.PLAYER_1_STRING || board.getWinner() == C.PLAYER_2_STRING) {
-                MainActivity.isGamePlaying = false
+            if (isGamePlaying) board.makeMove(move as InterfaceMove<Position>)
+            if (board.isGameOver()) {
+                isGamePlaying = false
             }
-
         }
     }
 
     private fun createBoardList(): Array<Array<GameSquare>> {
-        var gameBoard : Array<Array<GameSquare>> = Array(C.SIZE) { Array(C.SIZE) {GameSquare()} }
+        var gameBoard : Array<Array<GameSquare>> = Array(C.SIZE) { Array(
+            C.SIZE) { GameSquare() } }
         for (i in 0 until C.SIZE) {
             for (j in 0 until C.SIZE) {
                 gameBoard[i][j].setString(boardViews[i][j].text.toString())
@@ -80,10 +83,6 @@ class GameSession(private val boardViews: ArrayList<ArrayList<TextView>>,
     }
 
     fun kill() {
-        MainActivity.isGamePlaying = false
-    }
-
-    fun restart() {
-        MainActivity.isGamePlaying = false
+        isGamePlaying = false
     }
 }

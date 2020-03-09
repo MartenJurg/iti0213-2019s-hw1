@@ -1,7 +1,6 @@
-package ee.taltech.mjurge.iti0213_2019s_hw1.board
+package ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board
 
-import ee.taltech.mjurge.iti0213_2019s_hw1.C
-import ee.taltech.mjurge.iti0213_2019s_hw1.GameSquare
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Constants.C
 import kotlin.math.abs
 
 class GameBoard<U : InterfacePosition>(private var board: Array<Array<GameSquare>>, private var player1Turn: Boolean):
@@ -10,11 +9,18 @@ class GameBoard<U : InterfacePosition>(private var board: Array<Array<GameSquare
     private var winner: String? = null
 
     override fun getBoard(): Array<Array<GameSquare>> {
-        return board.copyOf()
+        var newBoard : Array<Array<GameSquare>> = Array(C.SIZE) { Array(
+            C.SIZE) { GameSquare() } }
+        for (i in 0 until C.SIZE) {
+            for (j in 0 until C.SIZE) {
+                newBoard[i][j].setString(board[i][j].getString())
+            }
+        }
+        return newBoard
     }
 
     override fun makeMove(move: InterfaceMove<U>): Boolean {
-        if (canMakeMove(move)) {
+        if (canMakeMove(move) && !isGameOver()) {
             val playerTag = board[move.from().getRow()][move.from().getCol()].getString()
             board[move.from().getRow()][move.from().getCol()].setString("")
             board[move.to().getRow()][move.to().getCol()].setString(playerTag)
@@ -123,5 +129,44 @@ class GameBoard<U : InterfacePosition>(private var board: Array<Array<GameSquare
                 board[i][j].deSelect()
             }
         }
+    }
+
+    override fun isGameOver(): Boolean {
+        if (winner != null) return true
+        else if (!canPlayerMove()) return true
+        return false
+    }
+
+    private fun canPlayerMove(): Boolean {
+        if (player1Turn && getPossibleMoves(C.PLAYER_1_STRING).size == 0) {
+            return false
+        } else if (!player1Turn && getPossibleMoves(C.PLAYER_2_STRING).size == 0) {
+            return false
+        }
+        return true
+    }
+
+    private fun getPossibleMoves(playerString: String): ArrayList<Move<U>> {
+        var movesList: ArrayList<Move<U>> = ArrayList<Move<U>>()
+
+        for (i in 0 until C.SIZE) {
+            for (j in 0 until C.SIZE) {
+                if (board[i][j].getString() == playerString) {
+                    var move = Move(Position(i, j), Position(i + 1, j + 1))
+                    if (canMakeMove(move as InterfaceMove<U>)) movesList.add(move as Move<U>)
+                    move = Move(Position(i, j), Position(i - 1, j + 1))
+                    if (canMakeMove(move as InterfaceMove<U>)) movesList.add(move as Move<U>)
+                    move = Move(Position(i, j), Position(i + 1, j - 1))
+                    if (canMakeMove(move as InterfaceMove<U>)) movesList.add(move as Move<U>)
+                    move = Move(Position(i, j), Position(i - 1, j - 1))
+                    if (canMakeMove(move as InterfaceMove<U>)) movesList.add(move as Move<U>)
+                }
+            }
+        }
+        return movesList
+    }
+
+    override fun deepCopy(): InterfaceBoard<GameSquare, U> {
+        return GameBoard(getBoard(), player1Turn)
     }
 }

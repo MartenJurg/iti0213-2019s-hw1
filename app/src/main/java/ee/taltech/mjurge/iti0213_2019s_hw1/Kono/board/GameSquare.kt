@@ -1,8 +1,4 @@
-package ee.taltech.mjurge.iti0213_2019s_hw1
-
-import android.icu.text.Transliterator
-import android.widget.Button
-import ee.taltech.mjurge.iti0213_2019s_hw1.board.InterfacePosition
+package ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board
 
 class GameSquare: InterfaceGameSquare {
 

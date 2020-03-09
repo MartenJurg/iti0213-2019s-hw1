@@ -1,8 +1,8 @@
-package ee.taltech.mjurge.iti0213_2019s_hw1.Player
+package ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Player
 
 import android.util.Log
-import ee.taltech.mjurge.iti0213_2019s_hw1.InterfaceGameSquare
-import ee.taltech.mjurge.iti0213_2019s_hw1.board.*
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board.InterfaceGameSquare
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board.*
 import kotlinx.coroutines.delay
 
 class HumanPlayer<T: InterfaceGameSquare, U: InterfacePosition>(private var playerString: String):
@@ -26,6 +26,7 @@ class HumanPlayer<T: InterfaceGameSquare, U: InterfacePosition>(private var play
         }
         Log.d("---", "out of first while")
         board.select(from as U)
+        Log.d("---", "SELECTED!")
         clickedPos = null
         while (true) {
             Log.d("---", "second while start")
@@ -52,7 +53,6 @@ class HumanPlayer<T: InterfaceGameSquare, U: InterfacePosition>(private var play
     @Synchronized
     private suspend fun waitForClickedLocation(): Position {
         while (true) {
-            Log.d("---", clickedPos.toString())
             if (clickedPos != null) {
                 break
             }

@@ -1,7 +1,5 @@
-package ee.taltech.mjurge.iti0213_2019s_hw1
+package ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board
 
-import android.icu.text.Transliterator
-import ee.taltech.mjurge.iti0213_2019s_hw1.board.InterfacePosition
 import java.io.Serializable
 
 interface InterfaceGameSquare: Serializable {

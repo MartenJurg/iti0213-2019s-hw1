@@ -7,7 +7,10 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import ee.taltech.mjurge.iti0213_2019s_hw1.board.Position
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.Constants.C
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.GameSession
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board.GameSquare
+import ee.taltech.mjurge.iti0213_2019s_hw1.Kono.board.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,7 +19,6 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity(),  View.OnClickListener {
 
     companion object {
-        var isGamePlaying = false
         var gameModes = arrayOf(C.PlayerVsAI, C.PlayerVsPlayer, C.AIVsAI)
         var gameMode = C.PlayerVsAI
     }
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity(),  View.OnClickListener {
     private lateinit var startingPlayerSwitch: Switch
     private var handler: Handler = Handler()
     private var player1Turn = true
-    private lateinit var gameSession: GameSession
+    private var gameSession: GameSession? = null
     private var buttonsTextViews = ArrayList<ArrayList<TextView>>()
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
@@ -37,6 +39,23 @@ class MainActivity : AppCompatActivity(),  View.OnClickListener {
 
         initTextFieldsAndButtons()
         makeButtonTextViews()
+
+        gameSession = savedInstanceState?.getSerializable(C.GAME_SESSION_KEY) as GameSession?
+        if (gameSession != null) {
+            updateBoard(gameSession!!.board.getBoard())
+            startGameButton.text = C.RESTART_STRING
+            coroutineScope.launch {
+                gameSession!!.keepPlaying()
+
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            putSerializable(C.GAME_SESSION_KEY, gameSession)
+        }
+        super.onSaveInstanceState(outState)
     }
 
     private fun initTextFieldsAndButtons() {
@@ -64,56 +83,44 @@ class MainActivity : AppCompatActivity(),  View.OnClickListener {
     fun onClickStart(v: View?) {
         gameMode = gameModeSpinner.selectedItem.toString()
         player1Turn = !startingPlayerSwitch.isChecked
-        if (isGamePlaying) {
-            gameSession.restart()
-            coroutineScope.launch {
-                gameSession.play(player1Turn)
-            }
-        } else {
-            gameSession = GameSession(buttonsTextViews, gameMode, player1Turn)
-            updateBoard(gameSession.board.getBoard())
-            coroutineScope.launch {
-                gameSession.play(player1Turn)
-            }
-
+        if (gameSession != null) {
+            gameSession!!.kill()
+        }
+        gameSession = GameSession(
+            buttonsTextViews,
+            gameMode,
+            player1Turn
+        )
+        startGameButton.text = C.RESTART_STRING
+        updateBoard(gameSession!!.board.getBoard())
+        coroutineScope.launch {
+            gameSession!!.play(player1Turn)
         }
     }
-
 
     override fun onClick(v: View) {
-
-
-        val id = v.id
-        val idString = v.resources.getResourceName(id)
+        val idString = v.resources.getResourceName(v.id)
         val col = idString.substring(idString.lastIndex).toInt()
         val row = idString.substring(idString.lastIndex - 1, idString.lastIndex).toInt()
-        Log.d("---", row.toString())
-        Log.d("---", col.toString())
-        if (isGamePlaying) {
-            gameSession.onButtonClick(Position(row, col))
+        if (gameSession != null && gameSession!!.isGamePlaying) {
+            gameSession!!.onButtonClick(Position(row, col))
         }
-    }
-
-    private fun findViewPos(v: View): Position? {
-        for (i in 0 until C.SIZE) {
-            for (j in 0 until C.SIZE) {
-                buttonsTextViews[i][j].id == v.id
-                return Position(i, j)
-            }
-        }
-        return null
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateTextViewWhosTurn() {
-        val tempBoard = gameSession.board
-        if (tempBoard.getWinner() == C.PLAYER_1_STRING || gameSession.board.getWinner() == C.PLAYER_2_STRING) {
-            var winnerString = ""
-            winnerString = if (tempBoard.getWinner() == C.PLAYER_1_STRING) "Player 1" else "Player 2"
-            whosTurnTextView.text = winnerString + " won the game!"
-            startGameButton.text = C.Start
+        val tempBoard = gameSession!!.board
+        if (tempBoard.isGameOver()) {
+            if (tempBoard.getWinner() == null) {
+                whosTurnTextView.text = C.DRAW_STRING
+            } else {
+                var winnerString = ""
+                winnerString = if (tempBoard.getWinner() == C.PLAYER_1_STRING) C.PLAYER_1 else C.PLAYER_2
+                whosTurnTextView.text = winnerString + C.WON_GAME_ENDING
+                startGameButton.text = C.START_STRING
+            }
         } else {
-            whosTurnTextView.text = "Currently " + (if (tempBoard.getPlayer1Turn()) C.PLAYER_1_STRING else C.PLAYER_2_STRING) + "`s turn"
+            whosTurnTextView.text = C.WHOS_TURN_BEGINNING + (if (tempBoard.getPlayer1Turn()) C.PLAYER_1_STRING else C.PLAYER_2_STRING) + C.WHOS_TURN_ENDING
         }
     }
 
@@ -130,7 +137,7 @@ class MainActivity : AppCompatActivity(),  View.OnClickListener {
         }
 
         handler.postDelayed({
-            updateBoard(gameSession.board.getBoard())
+            updateBoard(gameSession!!.board.getBoard())
             updateTextViewWhosTurn()
         }, C.BOARD_REFRESH_DELAY)
     }
