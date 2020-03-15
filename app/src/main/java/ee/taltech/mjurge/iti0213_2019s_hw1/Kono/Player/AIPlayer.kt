@@ -12,9 +12,8 @@ import kotlin.math.min
 
 class AIPlayer<T: InterfaceGameSquare, U: InterfacePosition>(private var playerString: String):
     InterfacePlayer<T, U>, Serializable {
-    override suspend fun getMove(board: InterfaceBoard<T, U>): InterfaceMove<U> {
-        Log.d("---", "AI player start")
-
+    override suspend fun getMove(realBoard: InterfaceBoard<T, U>): InterfaceMove<U> {
+        var board = realBoard.deepCopy()
 
 
         var possibleMoves = getPossibleMoves(board)

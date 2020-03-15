@@ -18,10 +18,8 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(),  View.OnClickListener {
 
-    companion object {
-        var gameModes = arrayOf(C.PlayerVsAI, C.PlayerVsPlayer, C.AIVsAI)
-        var gameMode = C.PlayerVsAI
-    }
+    private var gameModes = arrayOf(C.PlayerVsAI, C.PlayerVsPlayer, C.AIVsAI)
+    private var gameMode = C.PlayerVsAI
 
     private lateinit var whosTurnTextView : TextView
     private lateinit var startGameButton : TextView

@@ -37,9 +37,6 @@ class HumanPlayer<T: InterfaceGameSquare, U: InterfacePosition>(private var play
                 board.deSelect(from as U)
                 clickedPos = null
                 return getMove(board)
-            } else if (tempBoard[from.getRow()][from.getCol()].getString()
-                == tempBoard[to.getRow()][to.getCol()].getString()) {
-                from = to
             }
         }
         Log.d("---", "end")

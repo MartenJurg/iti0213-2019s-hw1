@@ -18,7 +18,7 @@ class C {
         const val WHOS_TURN_ENDING = "`s turn"
         const val DRAW_STRING = "DRAW!"
         const val BOARD_REFRESH_DELAY = 50L
-        const val AI_DEPTH = 7
+        const val AI_DEPTH = 4
         const val GAME_SESSION_KEY = "gameSessionKey"
     }
 }

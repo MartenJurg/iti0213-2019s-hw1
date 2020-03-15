@@ -9,6 +9,10 @@ class GameBoard<U : InterfacePosition>(private var board: Array<Array<GameSquare
     private var winner: String? = null
 
     override fun getBoard(): Array<Array<GameSquare>> {
+        return board
+    }
+
+    private fun getCopyBoard(): Array<Array<GameSquare>> {
         var newBoard : Array<Array<GameSquare>> = Array(C.SIZE) { Array(
             C.SIZE) { GameSquare() } }
         for (i in 0 until C.SIZE) {
@@ -167,6 +171,6 @@ class GameBoard<U : InterfacePosition>(private var board: Array<Array<GameSquare
     }
 
     override fun deepCopy(): InterfaceBoard<GameSquare, U> {
-        return GameBoard(getBoard(), player1Turn)
+        return GameBoard(getCopyBoard(), player1Turn)
     }
 }
