@@ -20,6 +20,7 @@ class GameSession(private val boardViews: ArrayList<ArrayList<TextView>>,
     var isGamePlaying = false
     val board: GameBoard<Position> = GameBoard(createBoardList(), player1Turn)
 
+
     init {
         when (gameMode) {
             C.AIVsAI -> {
